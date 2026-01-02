@@ -1,30 +1,32 @@
 import express from "express";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.get("/get-price", async (req, res) => {
-  const url = req.query.url;
-  if (!url) return res.status(400).send("Missing url");
+app.get("/price", async (_, res) => {
+  const browser = await puppeteer.launch({
+    executablePath: "/usr/bin/chromium-browser",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ],
+    headless: true
+  });
 
-  try {
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2" });
+  const page = await browser.newPage();
+  await page.goto(
+    "https://workplace.vanguard.com/investments/product-details/fund/1685",
+    { waitUntil: "networkidle2" }
+  );
 
-    const price = await page.$eval(
-      'span[data-rpa-tag-id="pp-cp-nav-price"]',
-      (el) => el.textContent.trim()
-    );
+  const price = await page.$eval(
+    'span[data-rpa-tag-id="pp-cp-nav-price"]',
+    el => el.textContent.trim()
+  );
 
-    await browser.close();
-    res.json({ price });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  await browser.close();
+  res.send(price);
 });
 
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+app.listen(3000);
