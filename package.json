@@ -1,10 +1,11 @@
 {
-  "name": "vanguard-proxy",
-  "version": "1.0.0",
+  "name": "vanguard-scraper",
   "type": "module",
-  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
-    "puppeteer": "^21.6.1"
+    "puppeteer-core": "^21.6.1"
   }
 }
